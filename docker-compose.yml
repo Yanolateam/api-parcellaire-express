@@ -17,6 +17,7 @@ services:
             - MAX_PARALLEL_DL
         volumes:
             - importer-data:/tmp
+        restart: always
 
     parcellaire-postgis:
         container_name: parcellaire-express-postgis
@@ -29,13 +30,8 @@ services:
             - POSTGRES_DB
             - POSTGRES_USER
             - POSTGRES_PASSWORD
-        # Exposition du port de la base de données pour test si nécessaire
-        # ports:
-            # - "5432:5432"
         volumes:
             - parcellaire-postgis-data:/var/lib/postgresql/data
-        # Options de configuration issues de PGTune (https://pgtune.leopard.in.ua)
-        # Valeurs par défaut pour une instance Hetzner CPX21
         command:
             - "postgres"
             - "-c"
@@ -70,9 +66,6 @@ services:
             - "max_parallel_workers=4"
             - "-c"
             - "max_parallel_maintenance_workers=2"
-            # Pour logguer l'intégralité des requêtes effectuées sur la base
-            # - "-c"
-            # - "log_statement=all"
         shm_size: 2g
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
@@ -80,16 +73,7 @@ services:
             timeout: 5s
             retries: 5
             start_period: 10s
-
-    # Frontal web pour exploration de la base si nécessaire
-    # parcellaire-adminer:
-    #     container_name: parcellaire-express-adminer
-    #     image: adminer:4.8.1
-    #     ports:
-    #        - "8080:8080"
-    #    environment: 
-    #         - ADMINER_DEFAULT_SERVER=${DB_HOST}
-    #         - ADMINER_DESIGN=hydra
+        restart: always
 
     parcellaire-api:
         container_name: parcellaire-express-api
@@ -113,9 +97,11 @@ services:
             timeout: 5s
             retries: 5
             start_period: 10s
+        restart: always
 
 volumes:
     parcellaire-postgis-data:
         name: parcellaire-postgis-data
     importer-data:
         name: importer-data
+
